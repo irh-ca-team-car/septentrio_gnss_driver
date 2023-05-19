@@ -201,6 +201,7 @@ namespace io_comm_rx {
     class RxMessage
     {
     public:
+        void create_subs();
         /**
          * @brief Constructor of the RxMessage class
          *
@@ -278,6 +279,7 @@ namespace io_comm_rx {
                 std::make_pair("5914", evReceiverTime)};
 
             rx_id_map = RxIDMap(rx_id_pairs, rx_id_pairs + evReceiverSetup + 1);
+            create_subs();
         }
 
         /**

@@ -2,7 +2,8 @@
 
 # GNSS/INS Parameters
 
-device: tcp://192.168.3.1:28000
+#device: tcp://192.168.3.1:28000
+device: tcp://192.168.1.210:28000
 
 serial:
   baudrate: 921600
@@ -90,37 +91,37 @@ rtk_settings:
 
 publish:
   # For both GNSS and INS Rxs
-  navsatfix: false
+  navsatfix: true
   gpsfix: true
-  gpgga: false
-  gprmc: false
-  gpst: false
-  measepoch: false
-  pvtcartesian: false
+  gpgga: true
+  gprmc: true
+  gpst: true
+  measepoch: true
+  pvtcartesian: true
   pvtgeodetic: true
-  basevectorcart: false
-  basevectorgeod: false
-  poscovcartesian: false
+  basevectorcart: true
+  basevectorgeod: true
+  poscovcartesian: true
   poscovgeodetic: true
   velcovgeodetic: true
   atteuler: true
   attcoveuler: true
-  pose: false
-  twist: false
-  diagnostics: false
+  pose: true
+  twist: true
+  diagnostics: true
   # For GNSS Rx only
-  gpgsa: false
-  gpgsv: false
+  gpgsa: true
+  gpgsv: true
   # For INS Rx only
-  insnavcart: false
-  insnavgeod: false
-  extsensormeas: false
-  imusetup: false
-  velsensorsetup: false
-  exteventinsnavcart: false
-  exteventinsnavgeod: false
-  imu: false
-  localization: false
+  insnavcart: true
+  insnavgeod: true
+  extsensormeas: true
+  imusetup: true
+  velsensorsetup: true
+  exteventinsnavcart: true
+  exteventinsnavgeod: true
+  imu: true
+  localization: true
   tf: false
 
 # INS-Specific Parameters
@@ -169,4 +170,4 @@ ins_vsm:
 
 # logger
 
-activate_debug_log: false
+activate_debug_log: true

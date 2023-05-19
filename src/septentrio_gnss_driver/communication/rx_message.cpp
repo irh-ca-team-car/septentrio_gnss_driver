@@ -1902,6 +1902,39 @@ void io_comm_rx::RxMessage::publishTf(const LocalizationUtmMsg& msg)
                 "No leap seconds were set and none were received from log yet.");
     }
 }
+void io_comm_rx::RxMessage::create_subs()
+{
+    node_->publishMessage<PVTCartesianMsg>("/pvtcartesian");
+    node_->publishMessage<PVTGeodeticMsg>("/pvtgeodetic");
+    node_->publishMessage<BaseVectorCartMsg>("/basevectorcart");
+    node_->publishMessage<BaseVectorGeodMsg>("/basevectorgeod");
+    node_->publishMessage<PosCovCartesianMsg>("/poscovcartesian");
+    node_->publishMessage<PosCovGeodeticMsg>("/poscovgeodetic");
+    node_->publishMessage<AttEulerMsg>("/atteuler");
+    node_->publishMessage<AttCovEulerMsg>("/attcoveuler");
+    node_->publishMessage<INSNavCartMsg>("/insnavcart");
+    node_->publishMessage<INSNavGeodMsg>("/insnavgeod");
+    node_->publishMessage<TwistWithCovarianceStampedMsg>("/twist_ins");
+    node_->publishMessage<IMUSetupMsg>("/imusetup");
+    node_->publishMessage<VelSensorSetupMsg>("/velsensorsetup");
+    node_->publishMessage<INSNavCartMsg>("/exteventinsnavcart");
+    node_->publishMessage<INSNavGeodMsg>("/exteventinsnavgeod");
+    node_->publishMessage<ExtSensorMeasMsg>("/extsensormeas");
+    node_->publishMessage<ImuMsg>("/imu");
+    node_->publishMessage<TimeReferenceMsg>("/gpst");
+    node_->publishMessage<GpggaMsg>("/gpgga");
+    node_->publishMessage<GprmcMsg>("/gprmc");
+    node_->publishMessage<GpgsaMsg>("/gpgsa");
+    node_->publishMessage<GpgsvMsg>("/gpgsv");
+    node_->publishMessage<NavSatFixMsg>("/navsatfix");
+    node_->publishMessage<GPSFixMsg>("/gpsfix");
+    node_->publishMessage<PoseWithCovarianceStampedMsg>("/pose");
+    node_->publishMessage<MeasEpochMsg>("/measepoch");
+    node_->publishMessage<VelCovGeodeticMsg>("/velcovgeodetic");
+    node_->publishMessage<TwistWithCovarianceStampedMsg>("/twist");
+    node_->publishMessage<DiagnosticArrayMsg>("/diagnostics");
+    node_->publishMessage<LocalizationUtmMsg>("/localization");
+}
 
 /**
  * Note that putting the default in the definition's argument list instead of the

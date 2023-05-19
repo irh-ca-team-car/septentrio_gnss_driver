@@ -307,6 +307,24 @@ public:
         }
     }
 
+      /**
+     * @brief Publishing function
+     * @param[in] topic String of topic
+     * @param[in] msg ROS message to be published
+     */
+    template <typename M>
+    void publishMessage(const std::string& topic)
+    {
+        auto it = topicMap_.find(topic);
+        if (it == topicMap_.end())
+        {
+            typename rclcpp::Publisher<M>::SharedPtr pub =
+                this->create_publisher<M>(topic, queueSize_);
+            topicMap_.insert(std::make_pair(topic, pub));
+        }
+    }
+
+
     /**
      * @brief Publishing function for tf
      * @param[in] msg ROS localization message to be converted to tf

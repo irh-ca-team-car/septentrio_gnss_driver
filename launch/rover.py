@@ -52,7 +52,9 @@ def generate_launch_description():
         package='septentrio_gnss_driver', 
         plugin='rosaic_node::ROSaicNode',
         #emulate_tty=True,
-        parameters=[LaunchConfiguration(name_arg_file_path)])
+        parameters=[LaunchConfiguration(name_arg_file_path),{
+            "__log_level":"debug"
+        }])
 
     container = ComposableNodeContainer(
         name='septentrio_gnss_driver_container',
@@ -60,7 +62,7 @@ def generate_launch_description():
         package='rclcpp_components',
         executable='component_container',
         emulate_tty=True,
-        sigterm_timeout = '20',
+        sigterm_timeout = '5',
         composable_node_descriptions=[composable_node],
         output='screen'
     )
