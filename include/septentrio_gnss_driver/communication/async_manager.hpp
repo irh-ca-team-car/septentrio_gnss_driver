@@ -126,7 +126,7 @@ namespace io_comm_rx {
          */
         AsyncManager(ROSaicNodeBase* node, boost::shared_ptr<StreamT> stream,
                      boost::shared_ptr<boost::asio::io_service> io_service,
-                     std::size_t buffer_size = 16384);
+                     bool* connected, std::size_t buffer_size = 16384);
         virtual ~AsyncManager();
 
         /**
@@ -149,6 +149,9 @@ namespace io_comm_rx {
     private:
         //! Pointer to the node
         ROSaicNodeBase* node_;
+        bool* status;
+        std::shared_ptr<boost::thread> watchdog;
+        int watchdog_count =0;
 
     protected:
         //! Reads in via async_read_some and hands certain number of bytes
@@ -328,7 +331,7 @@ namespace io_comm_rx {
     template <typename StreamT>
     AsyncManager<StreamT>::AsyncManager(
         ROSaicNodeBase* node, boost::shared_ptr<StreamT> stream,
-        boost::shared_ptr<boost::asio::io_service> io_service,
+        boost::shared_ptr<boost::asio::io_service> io_service, bool* status,
         std::size_t buffer_size) :
         node_(node),
         timer_(*(io_service.get()), boost::posix_time::seconds(1)), stopping_(false),
@@ -342,6 +345,7 @@ namespace io_comm_rx {
             "Setting the private stream variable of the AsyncManager instance.");
         stream_ = stream;
         io_service_ = io_service;
+        this->status = status;
         in_.resize(buffer_size_);
 
         io_service_->post(boost::bind(&AsyncManager<StreamT>::read, this));
@@ -369,6 +373,24 @@ namespace io_comm_rx {
         node_->log(LogLevel::DEBUG, "Launching tryParsing() thread..");
         parsing_thread_.reset(
             new boost::thread(boost::bind(&AsyncManager::tryParsing, this)));
+
+        watchdog = std::make_shared<boost::thread>([this]() {
+            while (true)
+            {
+                boost::this_thread::interruption_point();
+                boost::this_thread::sleep_for(boost::chrono::milliseconds(10000));
+                if (this->watchdog_count == 0)
+                {
+                    std::cout << "Closing socket due to no message received"
+                              << std::endl;
+                    this->close();
+                    *this->status = false;
+                    return;
+                }
+                this->watchdog_count = 0;
+                std::cout << "Watchdog" << std::endl;
+            }
+        });
     } // Calls std::terminate() on thread just created
 
     template <typename StreamT>
@@ -408,6 +430,7 @@ namespace io_comm_rx {
                            std::to_string(bytes_transferred));
         } else if (bytes_transferred > 0)
         {
+            watchdog_count++;
             Timestamp inTime = node_->getTime();
             if (read_callback_ &&
                 !stopping_) // Will be false in InitializeSerial (first call)

@@ -56,8 +56,6 @@ rosaic_node::ROSaicNode::ROSaicNode(const rclcpp::NodeOptions& options) :
 
     this->log(LogLevel::DEBUG, "Called ROSaicNode() constructor..");
 
-    tfListener_.reset(new tf2_ros::TransformListener(tfBuffer_));
-
     // Parameters must be set before initializing IO
     if (!getROSParams())
         return;

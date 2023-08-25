@@ -33,8 +33,12 @@
 
 // Boost includes
 #include <boost/regex.hpp>
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
+#include <mutex>
 #include <septentrio_gnss_driver/communication/communication_core.hpp>
 #include <septentrio_gnss_driver/communication/pcap_reader.hpp>
+#include <thread>
 
 #ifndef ANGLE_MAX
 #define ANGLE_MAX 180
@@ -1240,12 +1244,34 @@ bool io_comm_rx::Comm_IO::initializeTCP(std::string host, std::string port)
 
     try
     {
+
         // The list of endpoints obtained above may contain both IPv4 and IPv6
         // endpoints, so we need to try each of them until we find one that works.
         // This keeps the client program independent of a specific IP version. The
         // boost::asio::connect() function does this for us automatically.
-        socket->connect(*endpoint);
-        socket->set_option(boost::asio::ip::tcp::no_delay(true));
+
+        std::timed_mutex mtx;
+        mtx.lock();
+
+        boost::thread t([&socket, &mtx,&endpoint]() {
+            try
+            {
+                socket->connect(*endpoint);
+                socket->set_option(boost::asio::ip::tcp::no_delay(true));
+            } catch (std::runtime_error& e)
+            {
+                throw std::runtime_error("Could not connect to " +
+                                         endpoint->host_name() + ": " +
+                                         endpoint->service_name() + ": " + e.what());
+            }
+            mtx.unlock();
+        });
+        if(!mtx.try_lock_for(std::chrono::milliseconds(5000)))
+        {
+            throw std::runtime_error("Could not connect to " + endpoint->host_name() +
+                                 ": " + endpoint->service_name() + ": Timeout 5sec");
+            return false;
+        }
     } catch (std::runtime_error& e)
     {
         throw std::runtime_error("Could not connect to " + endpoint->host_name() +
@@ -1263,8 +1289,9 @@ bool io_comm_rx::Comm_IO::initializeTCP(std::string host, std::string port)
             "You have called the InitializeTCP() method though an AsyncManager object is already available! Start all anew..");
         return false;
     }
-    setManager(boost::shared_ptr<Manager>(
-        new AsyncManager<boost::asio::ip::tcp::socket>(node_, socket, io_service)));
+    setManager(
+        boost::shared_ptr<Manager>(new AsyncManager<boost::asio::ip::tcp::socket>(
+            node_, socket, io_service, &this->connected_)));
     node_->log(LogLevel::DEBUG, "Leaving initializeTCP() method..");
     return true;
 }
@@ -1455,8 +1482,8 @@ bool io_comm_rx::Comm_IO::initializeSerial(std::string port, uint32_t baudrate,
         return false;
     }
     node_->log(LogLevel::DEBUG, "Creating new Async-Manager object..");
-    setManager(boost::shared_ptr<Manager>(
-        new AsyncManager<boost::asio::serial_port>(node_, serial, io_service)));
+    setManager(boost::shared_ptr<Manager>(new AsyncManager<boost::asio::serial_port>(
+        node_, serial, io_service, &this->connected_)));
 
     // Setting the baudrate, incrementally..
     node_->log(LogLevel::DEBUG,
