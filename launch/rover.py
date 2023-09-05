@@ -50,10 +50,9 @@ def generate_launch_description():
         package='septentrio_gnss_driver',
         output="screen",
         parameters=[
-            LaunchConfiguration(name_arg_file_path), {
-                "__log_level": "debug"
-            }
+            LaunchConfiguration(name_arg_file_path)
         ],
+        arguments=['--ros-args', '--log-level', 'ERROR'],
         cwd=get_package_share_directory("apollo")
     )
 

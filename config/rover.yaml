@@ -171,4 +171,4 @@ septentrio_gnss_driver_container:
 
     # logger
 
-    activate_debug_log: true
+    activate_debug_log: false
