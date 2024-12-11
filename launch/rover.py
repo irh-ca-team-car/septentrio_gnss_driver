@@ -52,8 +52,7 @@ def generate_launch_description():
         parameters=[
             LaunchConfiguration(name_arg_file_path)
         ],
-        arguments=['--ros-args', '--log-level', 'ERROR'],
-        cwd=get_package_share_directory("apollo")
+        arguments=['--ros-args', '--log-level', 'ERROR']
     )
 
     return launch.LaunchDescription([arg_file_name, arg_file_path, container])
